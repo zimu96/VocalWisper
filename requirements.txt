@@ -1,0 +1,9 @@
+PyQt6>=6.4.0
+numpy>=1.22.0
+pyaudio>=0.2.13
+Pillow>=9.0.0
+pywhispercpp>=1.5.0
+# optional: global hotkeys / typing fallback on X11
+pynput>=1.7.6
+# optional: neural VAD instead of the energy-based one
+# onnxruntime>=1.16
