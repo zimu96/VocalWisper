@@ -23,8 +23,6 @@ DEFAULTS = {
     "duck_level": 0.2,          # volume (0..1) used while dictating
     "duck_mode": "target",
     "overlay_follow_focus": False,   # False: popup stays on the window where dictation started
-    "mic_protect": True,             # tune the microphone level while dictating
-    "mic_volume": 0.25,              # level that worked last time (restored level afterwards)
 }
 
 

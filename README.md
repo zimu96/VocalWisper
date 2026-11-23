@@ -45,11 +45,6 @@ Parte una sola istanza: un secondo avvio esce subito.
   Quando non parli va in pausa da solo (circa 0,3 s di silenzio).
 - Il testo viene scritto nel campo attivo a frasi (dopo ~0,5 s di pausa o ogni ~6 s di parlato continuo).
   La trascrizione gira in un thread separato: ascolto e indicatore di pausa non si bloccano mai.
-- **Microfono**: mentre detti, l'app regola da sola il volume del microfono (lo alza se la voce è
-  troppo debole, lo abbassa se satura) e a fine dettatura rimette il livello di prima, quindi chiamate
-  e browser mantengono la tua impostazione. Il livello che funziona viene ricordato per la volta dopo.
-  Si disattiva nelle impostazioni. Il livello di base all'avvio del PC (microfono 80%, uscita audio 100%)
-  lo imposta il servizio utente `fix-mic-volume.service`, indipendente da questa app.
 - **Ducking**: all'inizio legge il volume attuale, lo porta al livello scelto in *Volume durante la dettatura*
   e alla fine (stop, pausa manuale, chiusura, anche dopo un crash) lo rimette com'era.
 - Icona nel tray: bianca = ferma, rossa = in registrazione.

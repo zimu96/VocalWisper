@@ -46,16 +46,14 @@ def main():
     ov = overlay.Overlay()
     cap = audio.AudioCapture(sample_rate=cfg["sample_rate"])
     inj = injector.Injector()
-    from vocalwisper import ducker, mic
+    from vocalwisper import ducker
     from vocalwisper.guicall import GuiCall
     duck = ducker.Ducker()
-    micgain = mic.MicGain(cfg.get("mic_volume", 0.25))
     gui = GuiCall()
     import atexit, signal
     atexit.register(duck.restore)
-    atexit.register(micgain.end)
     for _sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
-        signal.signal(_sig, lambda *a: (duck.restore(), micgain.end(), os._exit(0)))
+        signal.signal(_sig, lambda *a: (duck.restore(), os._exit(0)))
     tr = {"obj": None}
     vad_det = vad.make_vad(threshold=cfg["silence_threshold"])
 
@@ -148,8 +146,6 @@ def main():
         ov.follow_focus = cfg.get("overlay_follow_focus", False)
         # remember the window dictation starts in: the text is written there
         state["pin"] = None if ov.follow_focus else winmod.capture_active_id()
-        if cfg.get("mic_protect", True):
-            micgain.begin(cfg.get("mic_volume", 0.25))
         try:
             cap.start()
         except Exception as e:
@@ -173,9 +169,6 @@ def main():
         state["stop"].set()
         cap.stop()
         duck.restore()
-        if cfg.get("mic_protect", True):
-            cfg["mic_volume"] = round(micgain.end(), 3)
-            config.save(cfg)
         tray_icon.set_state("idle")
         ov.hide(instant=True)
 
@@ -267,8 +260,6 @@ def main():
             ov.push_level(cap.rms(arr))
             now = time.time()
             sp = vad_det.is_speech(arr)
-            if cfg.get("mic_protect", True):
-                micgain.update(arr, sp, now)
             if sp:
                 if not seg:
                     seg.extend(preroll)

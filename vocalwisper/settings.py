@@ -68,10 +68,6 @@ class SettingsDialog(QDialog):
         self.follow_cb.setChecked(cfg.get("overlay_follow_focus", False))
         layout.addRow(self.follow_cb)
 
-        self.mic_cb = QCheckBox("Regola da solo il volume del microfono durante la dettatura (poi lo rimette com'era)")
-        self.mic_cb.setChecked(cfg.get("mic_protect", True))
-        layout.addRow(self.mic_cb)
-
         self.duck_cb = QCheckBox("Abbassa l'audio durante la dettatura")
         self.duck_cb.setChecked(cfg.get("duck_enabled", True))
         layout.addRow(self.duck_cb)
@@ -118,7 +114,6 @@ class SettingsDialog(QDialog):
         self.cfg["autostart"] = self.autostart_cb.isChecked()
         self.cfg["start_minimized"] = self.min_cb.isChecked()
         self.cfg["overlay_follow_focus"] = self.follow_cb.isChecked()
-        self.cfg["mic_protect"] = self.mic_cb.isChecked()
         self.cfg["duck_enabled"] = self.duck_cb.isChecked()
         self.cfg["duck_level"] = self.duck_slider.value() / 100.0
         config.save(self.cfg)
