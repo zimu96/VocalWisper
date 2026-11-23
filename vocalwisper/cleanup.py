@@ -12,8 +12,11 @@ def _key(token: str) -> str:
     return _STRIP_RE.sub("", token.lower())
 
 
-def _collapse(tokens, n, min_run):
-    """Collapse runs of the same n-gram (>= min_run) down to one occurrence."""
+_LOOP_RUN = 6
+
+
+def _collapse(tokens, n, min_run, keep=1):
+    """Collapse runs of the same n-gram (>= min_run) down to `keep` copies."""
     out = []
     keys = [_key(t) for t in tokens]
     i = 0
@@ -24,7 +27,7 @@ def _collapse(tokens, n, min_run):
                and keys[i:i + n] == keys[i + run * n:(i + run * n) + n]):
             run += 1
         if run >= min_run:
-            out.extend(tokens[i:i + n])
+            out.extend(tokens[i:i + n * keep])
             i += run * n
         else:
             out.append(tokens[i])
@@ -34,13 +37,13 @@ def _collapse(tokens, n, min_run):
 
 # whisper sometimes loops inside a single "word": mmmmmmmm... or mamamamama...
 _LETTER_RUN_RE = re.compile(r"([^\W\d_])\1{3,}", re.IGNORECASE)
-_SYLLABLE_RUN_RE = re.compile(r"([^\W\d_]{2,4})\1{3,}", re.IGNORECASE)
+_SYLLABLE_RUN_RE = re.compile(r"([^\W\d_]{2,4})\1{4,}", re.IGNORECASE)
 
 
 def collapse_char_loops(text: str) -> str:
     """Shrink endless letter/syllable runs inside one token (mmmmmmmm -> mm)."""
     text = _LETTER_RUN_RE.sub(lambda m: m.group(1) * 2, text)
-    return _SYLLABLE_RUN_RE.sub(lambda m: m.group(1), text)
+    return _SYLLABLE_RUN_RE.sub(lambda m: m.group(1) * 2, text)
 
 
 def clean_repetitions(text: str) -> str:
@@ -52,15 +55,13 @@ def clean_repetitions(text: str) -> str:
     if len(tokens) < 2:
         return text.strip()
 
+    # Repetitions spoken on purpose ("no no no", "ma dai ma dai") are kept.
+    # Only evident loops (same word/phrase >= _LOOP_RUN times in a row) are cut,
+    # and they are shrunk to two copies, not one.
     for _ in range(3):
         before = len(tokens)
-        # long repeated phrases are always an artifact
-        for n in range(12, 3, -1):
-            tokens = _collapse(tokens, n, 2)
-        # single words only when repeated at least three times
-        for n in (3, 2):
-            tokens = _collapse(tokens, n, 3 if n == 3 else 2)
-        tokens = _collapse(tokens, 1, 3)
+        for n in range(12, 0, -1):
+            tokens = _collapse(tokens, n, _LOOP_RUN, keep=2)
         if len(tokens) == before:
             break
 
