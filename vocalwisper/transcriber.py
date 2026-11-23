@@ -60,6 +60,9 @@ class Transcriber:
                 "no_context": True,
                 "suppress_blank": True,
                 "suppress_nst": True,
+                # a segment is at most ~6 s: cap its length so a decoding loop
+                # (mmmmmm...) cannot run on and get typed for seconds
+                "max_tokens": int(len(audio) / 16000 * 12) + 24,
             }
             if self.language:
                 params["language"] = self.language

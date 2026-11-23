@@ -32,10 +32,22 @@ def _collapse(tokens, n, min_run):
     return out
 
 
+# whisper sometimes loops inside a single "word": mmmmmmmm... or mamamamama...
+_LETTER_RUN_RE = re.compile(r"([^\W\d_])\1{3,}", re.IGNORECASE)
+_SYLLABLE_RUN_RE = re.compile(r"([^\W\d_]{2,4})\1{3,}", re.IGNORECASE)
+
+
+def collapse_char_loops(text: str) -> str:
+    """Shrink endless letter/syllable runs inside one token (mmmmmmmm -> mm)."""
+    text = _LETTER_RUN_RE.sub(lambda m: m.group(1) * 2, text)
+    return _SYLLABLE_RUN_RE.sub(lambda m: m.group(1), text)
+
+
 def clean_repetitions(text: str) -> str:
     """Remove whisper loop artifacts like "same phrase, same phrase, ..."."""
     if not text:
         return ""
+    text = collapse_char_loops(text)
     tokens = _TOKEN_RE.findall(text)
     if len(tokens) < 2:
         return text.strip()
@@ -80,7 +92,7 @@ def is_hallucination(text: str) -> bool:
     return False
 
 
-_FILLERS = {"e", "eh", "ehm", "eee", "mh", "mm", "mmm", "ah", "uh", "hm"}
+_FILLERS = {"e", "eh", "ehm", "eee", "m", "mh", "mm", "mmm", "ah", "uh", "hm"}
 _THANKS = {"grazie", "grazie mille", "grazie a tutti", "ciao", "a presto", "buonanotte"}
 
 
