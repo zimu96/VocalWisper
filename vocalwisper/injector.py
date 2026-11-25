@@ -110,7 +110,8 @@ class Injector:
 
     @staticmethod
     def _clipboard_set(data: bytes, primary: bool = False):
-        cmd = ["wl-copy"] + (["--primary"] if primary else [])
+        # --sensitive: Klipper / clipboard managers do not store it in their history
+        cmd = ["wl-copy", "--sensitive"] + (["--primary"] if primary else [])
         try:
             subprocess.run(cmd, input=data, timeout=2,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
